@@ -1,9 +1,9 @@
 # Environment and credentials
-.env
+private_html/.env
 *.env.local
 
 # Cache
-widgets/cache/
+public_html/widgets/cache/*.json
 
 # OS files
 .DS_Store

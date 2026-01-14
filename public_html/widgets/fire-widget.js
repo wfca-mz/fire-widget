@@ -30,15 +30,19 @@
     'use strict';
 
     // ========================================================================
-    // CONFIGURATION
+    // CONFIGURATION - Edit these for your deployment
     // ========================================================================
-    
-    // Allow pre-configuration via global variable
+
+    const WFCA_API_ENDPOINT = 'https://wfca.com/widgets/class-wfca-fire-api.php';
+    const WFCA_FIRE_MAP_URL = 'https://fire-map.wfca.com';
+
+    // ========================================================================
+    // RUNTIME CONFIG - Do not edit below
+    // ========================================================================
+
     const CONFIG = {
-        // API endpoint - update this to your deployment URL
-        // Can be overridden by setting window.WFCA_API_URL before loading this script
-        apiUrl: window.WFCA_API_URL || 'https://wfca.com/wp-json/wfca/v1/active-fires',
-        // Alternative: 'https://wfca.com/api/active-fires.php'
+        // API endpoint - override with window.WFCA_API_URL for local dev
+        apiUrl: window.WFCA_API_URL || WFCA_API_ENDPOINT,
 
         // Auto-refresh interval (5 minutes)
         refreshInterval: 5 * 60 * 1000,
@@ -47,7 +51,7 @@
         containerId: 'wfca-fire-widget',
 
         // Fire Map base URL
-        fireMapUrl: 'https://fire-map.wfca.com',
+        fireMapUrl: WFCA_FIRE_MAP_URL,
     };
 
     // ========================================================================

@@ -4,8 +4,8 @@
  * Load credentials from parent .env file
  */
 
-// Load .env from parent directory
-$envFile = __DIR__ . '/../.env';
+// Load .env from private_html (outside web root)
+$envFile = __DIR__ . '/../../private_html/.env';
 if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
@@ -31,3 +31,29 @@ define('WFCA_PG_NAME', getenv('WFCA_PG_NAME'));
 define('WFCA_PG_USER', getenv('WFCA_PG_USER'));
 define('WFCA_PG_PASS', getenv('WFCA_PG_PASS'));
 define('WFCA_PG_PORT', getenv('WFCA_PG_PORT') ?: 5432);
+
+// Environment detection
+define('WFCA_ENVIRONMENT', getenv('ENVIRONMENT') ?: 'production');
+define('WFCA_IS_DEV', WFCA_ENVIRONMENT === 'development');
+
+// API URLs based on environment
+if (!defined('WFCA_API_URL')) {
+    define('WFCA_API_URL', WFCA_IS_DEV
+        ? getenv('DEV_API_URL')
+        : getenv('PROD_API_URL')
+    );
+}
+if (!defined('WFCA_FIRE_MAP_URL')) {
+    define('WFCA_FIRE_MAP_URL', getenv('FIRE_MAP_URL') ?: 'https://fire-map.wfca.com');
+}
+
+/**
+ * Get widget config as JSON for injecting into pages
+ */
+function wfca_get_widget_config_json(): string {
+    return json_encode([
+        'apiUrl' => WFCA_API_URL,
+        'fireMapUrl' => WFCA_FIRE_MAP_URL,
+        'environment' => WFCA_ENVIRONMENT,
+    ]);
+}

@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,7 +71,8 @@
     <h1>WFCA Active Fires Widget - Test Page</h1>
 
     <div class="info">
-        <strong>Instructions:</strong> Start the PHP server with: <code>php -S localhost:8080</code> from the widgets directory.
+        <strong>Environment:</strong> <?= WFCA_ENVIRONMENT ?> |
+        <strong>API:</strong> <?= WFCA_API_URL ?>
     </div>
 
     <div class="test-section">
@@ -117,20 +119,17 @@
         </div>
     </div>
 
+    <!-- Inject config from PHP/.env -->
     <script>
-        // Override the API URL for local testing
-        window.addEventListener('DOMContentLoaded', function() {
-            if (window.WFCAFireWidget) {
-                window.WFCAFireWidget.config.apiUrl = 'http://localhost:8080/class-wfca-fire-api.php';
-            }
-        });
+        window.WFCA_API_URL = <?= json_encode(WFCA_API_URL) ?>;
+        window.WFCA_FIRE_MAP_URL = <?= json_encode(WFCA_FIRE_MAP_URL) ?>;
 
         async function testApi(limit) {
             const pre = document.getElementById('api-response');
             pre.textContent = 'Loading...';
 
             try {
-                const response = await fetch(`http://localhost:8080/class-wfca-fire-api.php?limit=${limit}`);
+                const response = await fetch(`${window.WFCA_API_URL}?limit=${limit}`);
                 const data = await response.json();
                 pre.textContent = JSON.stringify(data, null, 2);
             } catch (error) {
@@ -139,19 +138,7 @@
         }
     </script>
 
-    <!-- Load the widget script -->
-    <script>
-        // Modify CONFIG before loading widget
-        const WFCA_API_URL = 'http://localhost:8080/class-wfca-fire-api.php';
-    </script>
+    <!-- Load the widget (picks up window.WFCA_API_URL) -->
     <script src="fire-widget.js"></script>
-    <script>
-        // Override API URL after widget loads
-        if (window.WFCAFireWidget) {
-            window.WFCAFireWidget.config.apiUrl = 'http://localhost:8080/class-wfca-fire-api.php';
-            // Re-initialize widgets with new URL
-            window.WFCAFireWidget.initAll();
-        }
-    </script>
 </body>
 </html>

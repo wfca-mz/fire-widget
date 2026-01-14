@@ -48,13 +48,19 @@ define('WFCA_ALLOWED_ORIGINS', [
 ]);
 
 // Cache duration in seconds (5 minutes default)
-define('WFCA_CACHE_DURATION', 300);
+if (!defined('WFCA_CACHE_DURATION')) {
+    define('WFCA_CACHE_DURATION', 300);
+}
 
 // Fire Map base URL for generating links
-define('WFCA_FIRE_MAP_URL', 'https://fire-map.wfca.com');
+if (!defined('WFCA_FIRE_MAP_URL')) {
+    define('WFCA_FIRE_MAP_URL', 'https://fire-map.wfca.com');
+}
 
 // Cache directory for standalone mode (file-based cache)
-define('WFCA_CACHE_DIR', __DIR__ . '/cache');
+if (!defined('WFCA_CACHE_DIR')) {
+    define('WFCA_CACHE_DIR', __DIR__ . '/cache');
+}
 
 
 // ============================================================================
@@ -156,6 +162,45 @@ function wfca_file_cache_set(string $key, $data, int $ttl): bool {
     ]);
 
     return file_put_contents($cache_file, $content, LOCK_EX) !== false;
+}
+
+/**
+ * Clean up expired cache files
+ * Runs probabilistically to avoid overhead on every request
+ *
+ * @param int $max_age Maximum age in seconds for cache files (default: 1 hour)
+ * @param int $probability Chance of running (1-100, default: 1 = 1% of requests)
+ * @return int Number of files deleted
+ */
+function wfca_cache_cleanup(int $max_age = 3600, int $probability = 1): int {
+    // Only run probabilistically
+    if (mt_rand(1, 100) > $probability) {
+        return 0;
+    }
+
+    if (!is_dir(WFCA_CACHE_DIR)) {
+        return 0;
+    }
+
+    $deleted = 0;
+    $now = time();
+    $files = glob(WFCA_CACHE_DIR . '/wfca_fires_*.json');
+
+    if (!$files) {
+        return 0;
+    }
+
+    foreach ($files as $file) {
+        // Check file modification time
+        $mtime = @filemtime($file);
+        if ($mtime && ($now - $mtime) > $max_age) {
+            if (@unlink($file)) {
+                $deleted++;
+            }
+        }
+    }
+
+    return $deleted;
 }
 
 
@@ -444,8 +489,9 @@ if (!defined('ABSPATH')) {
         require_once $config_file;
     }
     
-    // Security: Only allow GET
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    // Security: Only allow GET (also handles CLI execution gracefully)
+    $request_method = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+    if ($request_method !== 'GET') {
         http_response_code(405);
         header('Content-Type: application/json');
         echo json_encode(['error' => 'Method not allowed']);
@@ -477,7 +523,22 @@ if (!defined('ABSPATH')) {
     if (isset($result['error'])) {
         http_response_code(500);
     }
-    
+
     echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+    // Flush output to client before cleanup
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    } else {
+        // For non-FastCGI environments, flush output buffer
+        if (ob_get_level() > 0) {
+            ob_end_flush();
+        }
+        flush();
+    }
+
+    // Run cache cleanup after response is sent (1% of requests, files older than 1 hour)
+    wfca_cache_cleanup(3600, 1);
+
     exit;
 }
