@@ -1,0 +1,24 @@
+# Environment and credentials
+.env
+*.env.local
+
+# Cache
+widgets/cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Backups
+*.bak
+*.backup
+*.old
