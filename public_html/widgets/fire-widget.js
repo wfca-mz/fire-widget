@@ -599,7 +599,7 @@
         const perPage = options.perPage || 10;
 
         // Apply sorting (filtering is done server-side now)
-        const sortField = state.sortField || 'updated';
+        const sortField = state.sortField || 'acres';
         const sortDir = state.sortDir || 'desc';
         const filterTerm = state.filterTerm || '';
         const currentPage = state.page || 1;

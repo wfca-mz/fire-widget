@@ -432,8 +432,8 @@ function wfca_fetch_fires_from_db(int $limit, string $state = '', string $search
         $params['search'] = '%' . $search . '%';
     }
 
-    // Order by: last updated desc, acreage desc, name asc
-    $sql .= " ORDER BY li.modifiedondatetime_dt DESC NULLS LAST, li.wfca_reportedacres DESC NULLS LAST, li.incidentname ASC LIMIT :limit";
+    // Order by: acreage desc, last updated desc, name asc (matches widget default)
+    $sql .= " ORDER BY li.wfca_reportedacres DESC NULLS LAST, li.modifiedondatetime_dt DESC NULLS LAST, li.incidentname ASC LIMIT :limit";
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
