@@ -281,8 +281,85 @@ function wfca_get_active_fires($request) {
 function wfca_fetch_fires_from_db(int $limit, string $state = '', string $search = ''): array {
     $pdo = wfca_get_db_connection();
 
-    // Inline query - same logic as vw_active_fires_widget but doesn't require the view
-    // This joins perimeter bbox data with incident location data
+    // ==========================================================================
+    // CURRENT QUERY: Incident locations as primary source (shows all fires)
+    // ==========================================================================
+    // Uses incident locations as primary data source, with optional perimeter
+    // bbox data when available. This shows ALL active fires, not just those
+    // with perimeters.
+    $sql = "
+        WITH
+        -- Get latest incident record per irwinid
+        latest_incidents AS (
+            SELECT DISTINCT ON (irwinid)
+                irwinid,
+                incidentname,
+                wfca_reportedacres,
+                poostate,
+                poocounty,
+                percentcontained,
+                modifiedondatetime_dt,
+                -- Transform from Web Mercator (3857) to WGS84 (4326) for lat/lng
+                ST_X(ST_Transform(geom::geometry, 4326)) AS lng,
+                ST_Y(ST_Transform(geom::geometry, 4326)) AS lat
+            FROM data.mvw_wfigs_incident_locations_current_history
+            WHERE modifiedondatetime_dt >= NOW() - INTERVAL '7 days'
+              AND wfca_reportedacres >= 1  -- Filter out fires < 1 acre
+            ORDER BY irwinid, modifiedondatetime_dt DESC NULLS LAST
+        ),
+        -- Get perimeter bbox data when available
+        perimeter_bbox AS (
+            SELECT
+                p.attr_irwinid,
+                p.gid,
+                p.globalid,
+                (p.bbox::jsonb -> 'coordinates' -> 0 -> 0 -> 0)::float AS min_lng,
+                (p.bbox::jsonb -> 'coordinates' -> 0 -> 0 -> 1)::float AS min_lat,
+                (p.bbox::jsonb -> 'coordinates' -> 0 -> 2 -> 0)::float AS max_lng,
+                (p.bbox::jsonb -> 'coordinates' -> 0 -> 2 -> 1)::float AS max_lat
+            FROM data.vw_wfigs_interagency_perimeters_current_bbox p
+        )
+        SELECT
+            COALESCE(pb.gid::text, li.irwinid::text) AS gid,
+            li.incidentname AS fire_name,
+            li.modifiedondatetime_dt AS modified_at,
+            li.irwinid AS irwin_id,
+            pb.globalid,
+            li.wfca_reportedacres AS acres,
+            li.poostate AS state,
+            li.poocounty AS county,
+            li.percentcontained AS percent_contained,
+            -- Use perimeter center if available, otherwise incident point
+            COALESCE(
+                ROUND(((pb.min_lng + pb.max_lng) / 2)::numeric, 6),
+                ROUND(li.lng::numeric, 6)
+            ) AS center_lng,
+            COALESCE(
+                ROUND(((pb.min_lat + pb.max_lat) / 2)::numeric, 6),
+                ROUND(li.lat::numeric, 6)
+            ) AS center_lat,
+            -- Calculate zoom based on perimeter size, or default to 13 for point
+            CASE
+                WHEN pb.min_lng IS NOT NULL THEN
+                    CASE
+                        WHEN GREATEST(pb.max_lng - pb.min_lng, pb.max_lat - pb.min_lat) > 0.5 THEN 9
+                        WHEN GREATEST(pb.max_lng - pb.min_lng, pb.max_lat - pb.min_lat) > 0.1 THEN 11
+                        WHEN GREATEST(pb.max_lng - pb.min_lng, pb.max_lat - pb.min_lat) > 0.01 THEN 13
+                        ELSE 15
+                    END
+                ELSE 13
+            END AS suggested_zoom
+        FROM latest_incidents li
+        LEFT JOIN perimeter_bbox pb ON li.irwinid = pb.attr_irwinid
+        WHERE 1=1
+    ";
+
+    /*
+    // ==========================================================================
+    // PREVIOUS QUERY: Perimeter-based (only shows fires with perimeters)
+    // ==========================================================================
+    // This query required fires to have perimeter data, missing many active fires.
+    // Kept for reference - can revert if needed.
     $sql = "
         WITH
         -- Get latest incident record per irwinid for acreage/location data
@@ -338,6 +415,7 @@ function wfca_fetch_fires_from_db(int $limit, string $state = '', string $search
         LEFT JOIN latest_incidents li ON bp.attr_irwinid = li.irwinid
         WHERE bp.attr_modifiedondatetime_dt >= NOW() - INTERVAL '7 days'
     ";
+    */
 
     $params = [];
 
@@ -350,12 +428,12 @@ function wfca_fetch_fires_from_db(int $limit, string $state = '', string $search
 
     // Optional name search filter (case-insensitive substring match)
     if (!empty($search)) {
-        $sql .= " AND (UPPER(li.incidentname) LIKE UPPER(:search) OR UPPER(bp.poly_incidentname) LIKE UPPER(:search))";
+        $sql .= " AND UPPER(li.incidentname) LIKE UPPER(:search)";
         $params['search'] = '%' . $search . '%';
     }
 
-    // Order by most recent modification date
-    $sql .= " ORDER BY bp.attr_modifiedondatetime_dt DESC NULLS LAST LIMIT :limit";
+    // Order by: last updated desc, acreage desc, name asc
+    $sql .= " ORDER BY li.modifiedondatetime_dt DESC NULLS LAST, li.wfca_reportedacres DESC NULLS LAST, li.incidentname ASC LIMIT :limit";
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
