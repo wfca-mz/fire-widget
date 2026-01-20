@@ -401,6 +401,208 @@
                 display: none;
             }
         }
+
+        /* Embed link in footer */
+        .wfca-fw__embed-link {
+            cursor: pointer;
+            text-decoration: underline;
+            margin-left: 4px;
+        }
+
+        .wfca-fw__embed-link:hover {
+            color: var(--wfca-primary);
+        }
+
+        /* Embed Modal */
+        .wfca-fw-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            padding: 20px;
+        }
+
+        .wfca-fw-modal {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .wfca-fw-modal__header {
+            background: linear-gradient(135deg, #d32f2f 0%, #f57c00 100%);
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .wfca-fw-modal__title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wfca-fw-modal__close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .wfca-fw-modal__close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .wfca-fw-modal__body {
+            padding: 20px;
+        }
+
+        .wfca-fw-modal__section {
+            margin-bottom: 20px;
+        }
+
+        .wfca-fw-modal__section:last-child {
+            margin-bottom: 0;
+        }
+
+        .wfca-fw-modal__label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .wfca-fw-modal__desc {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .wfca-fw-modal__code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .wfca-fw-modal__copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #444;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .wfca-fw-modal__copy-btn:hover {
+            background: #555;
+        }
+
+        .wfca-fw-modal__copy-btn--copied {
+            background: #4caf50;
+        }
+
+        .wfca-fw-modal__options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .wfca-fw-modal__option {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .wfca-fw-modal__option label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .wfca-fw-modal__option select,
+        .wfca-fw-modal__option input {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        .wfca-fw-modal__option select:focus,
+        .wfca-fw-modal__option input:focus {
+            outline: none;
+            border-color: #d32f2f;
+        }
+
+        .wfca-fw-modal__preview {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f9f9f9;
+        }
+
+        .wfca-fw-modal__preview-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .wfca-fw-modal__footer {
+            padding: 16px 20px;
+            background: #f5f5f5;
+            border-radius: 0 0 12px 12px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .wfca-fw-modal__footer a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+
+        .wfca-fw-modal__footer a:hover {
+            text-decoration: underline;
+        }
     `;
 
     // ========================================================================
@@ -661,11 +863,12 @@
                </div>`
             : '';
 
-        // Build footer
+        // Build footer with embed link
         const footerHtml = options.showTime !== false
             ? `<div class="wfca-fw__footer">
                    Data from <a href="${CONFIG.fireMapUrl}" target="_blank" rel="noopener">WFCA Fire Map</a>
                    &middot; ${totalFires} fires &middot; Updated ${new Date(meta.generated_at).toLocaleTimeString()}
+                   &middot; <span class="wfca-fw__embed-link" data-action="embed">[Embed]</span>
                </div>`
             : '';
 
@@ -751,8 +954,235 @@
                 filterInput.setSelectionRange(filterTerm.length, filterTerm.length);
             }
         }
+
+        // Attach event listener for embed link
+        const embedLink = container.querySelector('[data-action="embed"]');
+        if (embedLink) {
+            embedLink.addEventListener('click', () => {
+                showEmbedModal(options);
+            });
+        }
     }
-    
+
+    // ========================================================================
+    // EMBED MODAL
+    // ========================================================================
+
+    /**
+     * Show the embed code modal
+     * @param {Object} currentOptions Current widget options for defaults
+     */
+    function showEmbedModal(currentOptions = {}) {
+        // Remove any existing modal
+        const existingModal = document.querySelector('.wfca-fw-modal-overlay');
+        if (existingModal) existingModal.remove();
+
+        // Get the script URL (try to detect from current script or use production URL)
+        const scriptUrl = getScriptUrl();
+
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'wfca-fw-modal-overlay';
+        overlay.innerHTML = `
+            <div class="wfca-fw-modal">
+                <div class="wfca-fw-modal__header">
+                    <span class="wfca-fw-modal__title">
+                        <span>🔥</span> Embed Active Fires Widget
+                    </span>
+                    <button class="wfca-fw-modal__close" data-action="close">&times;</button>
+                </div>
+                <div class="wfca-fw-modal__body">
+                    <div class="wfca-fw-modal__section">
+                        <span class="wfca-fw-modal__label">Customize Your Widget</span>
+                        <p class="wfca-fw-modal__desc">Configure the widget options below, then copy the embed code.</p>
+                        <div class="wfca-fw-modal__options">
+                            <div class="wfca-fw-modal__option">
+                                <label>Theme</label>
+                                <select id="wfca-embed-theme">
+                                    <option value="light" ${currentOptions.theme !== 'dark' ? 'selected' : ''}>Light</option>
+                                    <option value="dark" ${currentOptions.theme === 'dark' ? 'selected' : ''}>Dark</option>
+                                </select>
+                            </div>
+                            <div class="wfca-fw-modal__option">
+                                <label>Max Fires</label>
+                                <select id="wfca-embed-limit">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50" selected>50</option>
+                                </select>
+                            </div>
+                            <div class="wfca-fw-modal__option">
+                                <label>Compact Mode</label>
+                                <select id="wfca-embed-compact">
+                                    <option value="false" ${!currentOptions.compact ? 'selected' : ''}>No</option>
+                                    <option value="true" ${currentOptions.compact ? 'selected' : ''}>Yes (Sidebar)</option>
+                                </select>
+                            </div>
+                            <div class="wfca-fw-modal__option">
+                                <label>Pre-filter (optional)</label>
+                                <input type="text" id="wfca-embed-query" placeholder="e.g., CA or Texas" value="">
+                            </div>
+                            <div class="wfca-fw-modal__option">
+                                <label>Custom Title (optional)</label>
+                                <input type="text" id="wfca-embed-title" placeholder="Active Wildfires" value="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wfca-fw-modal__section">
+                        <span class="wfca-fw-modal__label">Embed Code</span>
+                        <p class="wfca-fw-modal__desc">Copy and paste this code into your website's HTML.</p>
+                        <div class="wfca-fw-modal__code" style="position: relative;">
+                            <button class="wfca-fw-modal__copy-btn" data-action="copy">Copy</button>
+                            <code id="wfca-embed-code"></code>
+                        </div>
+                    </div>
+
+                    <div class="wfca-fw-modal__section">
+                        <span class="wfca-fw-modal__label">Preview</span>
+                        <div class="wfca-fw-modal__preview">
+                            <div class="wfca-fw-modal__preview-label">Live Preview</div>
+                            <div id="wfca-embed-preview" style="max-width: 360px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="wfca-fw-modal__footer">
+                    Powered by <a href="https://fire-map.wfca.com" target="_blank" rel="noopener">WFCA Fire Map</a>
+                    &middot; <a href="https://wfca.com" target="_blank" rel="noopener">Western Fire Chiefs Association</a>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Get elements
+        const modal = overlay.querySelector('.wfca-fw-modal');
+        const codeElement = document.getElementById('wfca-embed-code');
+        const previewElement = document.getElementById('wfca-embed-preview');
+        const themeSelect = document.getElementById('wfca-embed-theme');
+        const limitSelect = document.getElementById('wfca-embed-limit');
+        const compactSelect = document.getElementById('wfca-embed-compact');
+        const queryInput = document.getElementById('wfca-embed-query');
+        const titleInput = document.getElementById('wfca-embed-title');
+        const copyBtn = overlay.querySelector('[data-action="copy"]');
+        const closeBtn = overlay.querySelector('[data-action="close"]');
+
+        // Generate embed code function
+        function generateEmbedCode() {
+            const theme = themeSelect.value;
+            const limit = limitSelect.value;
+            const compact = compactSelect.value;
+            const query = queryInput.value.trim();
+            const title = titleInput.value.trim();
+
+            let attrs = `data-limit="${limit}"`;
+            if (theme === 'dark') attrs += ` data-theme="dark"`;
+            if (compact === 'true') attrs += ` data-compact="true"`;
+            if (query) attrs += ` data-query="${escapeHtml(query)}"`;
+            if (title) attrs += ` data-title="${escapeHtml(title)}"`;
+
+            const code = `<!-- WFCA Active Fires Widget -->
+<div id="wfca-fire-widget" ${attrs}></div>
+<script src="${scriptUrl}" async><\/script>`;
+
+            return code;
+        }
+
+        // Update code display and preview
+        function updateEmbed() {
+            const code = generateEmbedCode();
+            codeElement.textContent = code;
+
+            // Update preview
+            const theme = themeSelect.value;
+            const limit = limitSelect.value;
+            const compact = compactSelect.value;
+            const query = queryInput.value.trim();
+            const title = titleInput.value.trim();
+
+            previewElement.innerHTML = '';
+            const previewDiv = document.createElement('div');
+            previewDiv.setAttribute('data-wfca-widget', 'fire');
+            previewDiv.setAttribute('data-limit', Math.min(parseInt(limit), 5).toString()); // Limit preview to 5
+            previewDiv.setAttribute('data-theme', theme);
+            if (compact === 'true') previewDiv.setAttribute('data-compact', 'true');
+            if (query) previewDiv.setAttribute('data-query', query);
+            if (title) previewDiv.setAttribute('data-title', title);
+            previewElement.appendChild(previewDiv);
+
+            // Initialize the preview widget
+            initWidget(previewDiv);
+        }
+
+        // Initial update
+        updateEmbed();
+
+        // Listen for option changes
+        [themeSelect, limitSelect, compactSelect, queryInput, titleInput].forEach(el => {
+            el.addEventListener('change', updateEmbed);
+            el.addEventListener('input', updateEmbed);
+        });
+
+        // Copy button
+        copyBtn.addEventListener('click', async () => {
+            const code = generateEmbedCode();
+            try {
+                await navigator.clipboard.writeText(code);
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('wfca-fw-modal__copy-btn--copied');
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.classList.remove('wfca-fw-modal__copy-btn--copied');
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+            }
+        });
+
+        // Close modal
+        function closeModal() {
+            overlay.remove();
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', function escHandler(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', escHandler);
+            }
+        });
+    }
+
+    /**
+     * Get the script URL for embedding
+     * @returns {string} Script URL
+     */
+    function getScriptUrl() {
+        // Try to find current script
+        const scripts = document.querySelectorAll('script[src*="fire-widget"]');
+        if (scripts.length > 0) {
+            const src = scripts[scripts.length - 1].src;
+            // If it's localhost, return production URL
+            if (src.includes('localhost')) {
+                return 'https://wfca.com/widgets/fire-widget.js';
+            }
+            return src;
+        }
+        // Default to production URL
+        return 'https://wfca.com/widgets/fire-widget.js';
+    }
+
     /**
      * Render loading state
      * @param {HTMLElement} container Widget container
@@ -956,6 +1386,7 @@
     window.WFCAFireWidget = {
         init: initWidget,
         initAll: initAll,
+        showEmbedModal: showEmbedModal,
         config: CONFIG,
     };
     

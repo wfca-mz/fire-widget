@@ -4,8 +4,9 @@
  * Load credentials from parent .env file
  */
 
-// Load .env from private_html (outside web root)
-$envFile = __DIR__ . '/../../private_html/.env';
+// Load .env from private_html (sibling directory)
+// Structure: wfca.local/widgets/ and wfca.local/private_html/
+$envFile = __DIR__ . '/../private_html/.env';
 if (file_exists($envFile)) {
     $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
@@ -45,6 +46,16 @@ if (!defined('WFCA_API_URL')) {
 }
 if (!defined('WFCA_FIRE_MAP_URL')) {
     define('WFCA_FIRE_MAP_URL', getenv('FIRE_MAP_URL') ?: 'https://fire-map.wfca.com');
+}
+
+// CORS origins from environment (used by API)
+if (!defined('CORS_ORIGINS_DEV')) {
+    $cors_dev = getenv('CORS_ORIGINS_DEV');
+    if ($cors_dev) define('CORS_ORIGINS_DEV', $cors_dev);
+}
+if (!defined('CORS_ORIGINS_PROD')) {
+    $cors_prod = getenv('CORS_ORIGINS_PROD');
+    if ($cors_prod) define('CORS_ORIGINS_PROD', $cors_prod);
 }
 
 /**

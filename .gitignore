@@ -5,6 +5,15 @@ private_html/.env
 # Cache
 widgets/cache/*.json
 
+# Node modules
+node_modules/
+widgets/tests/node_modules/
+package-lock.json
+widgets/tests/package-lock.json
+
+# Test artifacts
+widgets/tests/test-results/
+
 # OS files
 .DS_Store
 Thumbs.db

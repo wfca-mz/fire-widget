@@ -36,16 +36,48 @@ if (!defined('WFCA_FIRE_API_LOADED')) {
     define('WFCA_FIRE_API_LOADED', true);
 }
 
-// Allowed origins for CORS - add your domains
-define('WFCA_ALLOWED_ORIGINS', [
-    'https://wfca.com',
-    'https://www.wfca.com',
-    'https://dailydispatch.com',
-    'https://www.dailydispatch.com',
-    'https://fire-map.wfca.com',
-    'http://localhost:3000',  // Development
-    'http://localhost:8000',
-]);
+// Allowed origins for CORS - loaded from environment
+// Set CORS_ORIGINS_DEV and CORS_ORIGINS_PROD in .env (comma-separated)
+// Falls back to hardcoded defaults if not set
+if (!defined('WFCA_ALLOWED_ORIGINS')) {
+    $cors_origins = [];
+
+    // Get environment (development or production)
+    $environment = defined('WFCA_ENVIRONMENT') ? WFCA_ENVIRONMENT : (getenv('ENVIRONMENT') ?: 'development');
+
+    // Load production origins
+    $prod_origins = defined('CORS_ORIGINS_PROD') ? CORS_ORIGINS_PROD : getenv('CORS_ORIGINS_PROD');
+    if ($prod_origins) {
+        $cors_origins = array_merge($cors_origins, array_map('trim', explode(',', $prod_origins)));
+    } else {
+        // Fallback production origins
+        $cors_origins = array_merge($cors_origins, [
+            'https://wfca.com',
+            'https://www.wfca.com',
+            'https://dailydispatch.com',
+            'https://www.dailydispatch.com',
+            'https://fire-map.wfca.com',
+        ]);
+    }
+
+    // Load dev origins only in development mode
+    if ($environment === 'development') {
+        $dev_origins = defined('CORS_ORIGINS_DEV') ? CORS_ORIGINS_DEV : getenv('CORS_ORIGINS_DEV');
+        if ($dev_origins) {
+            $cors_origins = array_merge($cors_origins, array_map('trim', explode(',', $dev_origins)));
+        } else {
+            // Fallback dev origins
+            $cors_origins = array_merge($cors_origins, [
+                'http://localhost:3000',
+                'http://localhost:8000',
+                'http://localhost:8080',
+                'http://localhost:8888',
+            ]);
+        }
+    }
+
+    define('WFCA_ALLOWED_ORIGINS', array_unique($cors_origins));
+}
 
 // Cache duration in seconds (5 minutes default)
 if (!defined('WFCA_CACHE_DURATION')) {
