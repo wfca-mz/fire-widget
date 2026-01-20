@@ -10,18 +10,22 @@
  *   <script src="https://wfca.com/widgets/fire-widget.js" async></script>
  * 
  *   <!-- With options -->
- *   <div id="wfca-fire-widget" 
+ *   <div id="wfca-fire-widget"
  *        data-limit="10"
  *        data-theme="light"
  *        data-title="Active Wildfires">
  *   </div>
- * 
+ *
+ *   <!-- Prefiltered by state -->
+ *   <div id="wfca-fire-widget" data-query="CA"></div>
+ *
  * OPTIONS (via data attributes):
  *   data-limit      Number of fires to show (default: 10, max: 50)
  *   data-theme      "light" or "dark" (default: light)
  *   data-title      Custom widget title
  *   data-show-time  Show "updated at" timestamp (default: true)
  *   data-compact    Compact mode for sidebars (default: false)
+ *   data-query      Preload with filter (state code, state name, or fire name)
  * 
  * @version 1.0.0
  * @author WFCA
@@ -238,6 +242,9 @@
         .wfca-fw__name {
             font-weight: 500;
             min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .wfca-fw__link {
@@ -892,6 +899,7 @@
             title: container.dataset.title || '',
             showTime: container.dataset.showTime !== 'false',
             compact: container.dataset.compact === 'true',
+            query: container.dataset.query || '',
         };
     }
     
@@ -917,9 +925,10 @@
         
         const options = parseOptions(container);
         
-        // Initial load
+        // Initial load (with optional preloaded query)
+        const initialState = options.query ? { filterTerm: options.query } : {};
         renderLoading(container, options);
-        loadWidget(container, options);
+        loadWidget(container, options, initialState);
         
         // Auto-refresh
         setInterval(() => loadWidget(container, options), CONFIG.refreshInterval);

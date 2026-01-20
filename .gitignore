@@ -3,7 +3,7 @@ private_html/.env
 *.env.local
 
 # Cache
-public_html/widgets/cache/*.json
+widgets/cache/*.json
 
 # OS files
 .DS_Store

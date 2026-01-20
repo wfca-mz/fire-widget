@@ -119,6 +119,18 @@
         </div>
     </div>
 
+    <div class="test-section">
+        <h2>5. Widget - Preloaded Query (Texas fires)</h2>
+        <div class="widget-container" style="max-width: 360px;">
+            <div data-wfca-widget="fire"
+                 data-limit="50"
+                 data-theme="light"
+                 data-query="texas"
+                 data-title="Texas Wildfires">
+            </div>
+        </div>
+    </div>
+
     <!-- Inject config from PHP/.env -->
     <script>
         window.WFCA_API_URL = <?= json_encode(WFCA_API_URL) ?>;
